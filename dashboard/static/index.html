@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Agent Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ══ TOP BAR ══════════════════════════════════════════════════════════ -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-icon">🎬</span>
+      <span class="brand-name">YouTube Agent Pipeline</span>
+    </div>
+    <div class="topbar-center">
+      <div class="niche-pill" id="niche-pill">
+        <span class="niche-dot"></span>
+        <span id="niche-badge">technology</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" id="btn-config" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Config
+      </button>
+      <button class="btn btn-primary" id="btn-start">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Start New Run
+      </button>
+    </div>
+  </header>
+
+  <!-- ══ MAIN LAYOUT ══════════════════════════════════════════════════════ -->
+  <div class="main-layout">
+
+    <!-- ── LEFT PANEL ─────────────────────────────────────────────── -->
+    <aside class="panel-left">
+
+      <!-- Active Run Card -->
+      <div class="card run-card">
+        <div class="card-header">
+          <span class="card-label">Active Run</span>
+          <span class="status-badge PENDING" id="run-status-badge">PENDING</span>
+        </div>
+        <div class="run-id-row">
+          <span class="mono-text" id="active-run-id">None</span>
+        </div>
+        <div id="run-actions" class="run-actions" style="display:none">
+          <button class="btn btn-sm btn-warning" id="btn-resume" onclick="resumeActiveRun()">
+            ↺ Resume Run
+          </button>
+        </div>
+      </div>
+
+      <!-- Pipeline Progress -->
+      <div class="card pipeline-card">
+        <div class="card-header">
+          <span class="card-label">Pipeline</span>
+          <span class="pipeline-progress-text" id="pipeline-progress-text">0 / 8</span>
+        </div>
+        <div class="pipeline-progress-bar">
+          <div class="pipeline-progress-fill" id="pipeline-progress-fill" style="width:0%"></div>
+        </div>
+        <div class="pipeline-flow" id="pipeline-flow"></div>
+      </div>
+
+    </aside>
+
+    <!-- ── CENTER PANEL ────────────────────────────────────────────── -->
+    <main class="panel-center">
+      <div class="log-toolbar">
+        <div class="log-toolbar-left">
+          <span class="card-label">Live Log Feed</span>
+          <div class="log-filters">
+            <button class="filter-chip active" id="filter-all">All</button>
+            <button class="filter-chip" id="filter-errors">Errors</button>
+          </div>
+        </div>
+        <div class="log-toolbar-right">
+          <select class="agent-filter-select" id="agent-filter-select">
+            <option value="">All Agents</option>
+          </select>
+          <button class="icon-btn" id="pin-btn" title="Pin scroll">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
+          </button>
+          <button class="icon-btn" id="clear-log-btn" title="Clear logs">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="log-feed" id="log-feed">
+        <div class="empty-state">
+          <div class="empty-icon">🚀</div>
+          <p>Start a new pipeline run to see live logs here.</p>
+        </div>
+      </div>
+      <div class="log-footer">
+        <span id="log-count" class="mono-text">0 entries</span>
+      </div>
+    </main>
+
+    <!-- ── RIGHT PANEL ─────────────────────────────────────────────── -->
+    <aside class="panel-right">
+
+      <!-- Thumbnail -->
+      <div class="card output-card">
+        <div class="card-header">
+          <span class="card-label">Thumbnail</span>
+          <button class="icon-btn" id="dl-thumbnail" disabled title="Download thumbnail">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+        </div>
+        <div class="thumbnail-wrap">
+          <img id="thumbnail-preview" alt="Thumbnail" style="display:none" />
+          <div id="thumb-placeholder" class="media-placeholder">
+            <span>🖼️</span><p>Thumbnail will appear here</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metadata -->
+      <div class="card output-card">
+        <div class="card-header">
+          <span class="card-label">Metadata</span>
+          <button class="icon-btn" id="dl-metadata" disabled title="Download metadata JSON">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+        </div>
+        <div class="meta-title" id="meta-title">Title will appear here…</div>
+        <div class="tag-chips" id="tags-container"></div>
+      </div>
+
+      <!-- Video -->
+      <div class="card output-card">
+        <div class="card-header">
+          <span class="card-label">Video Preview</span>
+          <div style="display:flex;gap:6px">
+            <button class="icon-btn" id="dl-script" disabled title="Download script JSON">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </button>
+            <button class="icon-btn" id="dl-video" disabled title="Download video">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="video-wrap">
+          <video id="video-preview" controls style="display:none"></video>
+          <div id="video-placeholder" class="media-placeholder">
+            <span>🎬</span><p>Video will appear here</p>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </div><!-- /.main-layout -->
+
+  <!-- ══ BOTTOM BAR ═══════════════════════════════════════════════════════ -->
+  <footer class="bottombar">
+    <div class="bottombar-header">
+      <span class="card-label">Run History</span>
+      <div class="pagination">
+        <button class="btn btn-ghost btn-sm" id="btn-prev-page">‹</button>
+        <span id="page-info" class="mono-text">— of —</span>
+        <button class="btn btn-ghost btn-sm" id="btn-next-page">›</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Run ID</th><th>Date</th><th>Niche</th><th>Topic</th>
+            <th>Status</th><th>Duration</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="runs-tbody">
+          <tr><td colspan="7" class="table-empty">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </footer>
+
+</div><!-- /.app -->
+
+<!-- ══ TOAST CONTAINER ══════════════════════════════════════════════════════ -->
+<div id="toast-container"></div>
+
+<!-- ══ CONFIG MODAL ═════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="config-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>⚙ Configuration</h2>
+      <button class="icon-btn" onclick="closeModal('config-modal')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <p class="modal-subtitle">Changes apply immediately for new runs. Edit <code>config.py</code> for permanent changes.</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Niche</label>
+        <input type="text" id="cfg-niche" placeholder="e.g. technology">
+      </div>
+      <div class="form-group">
+        <label>Video Length</label>
+        <select id="cfg-length">
+          <option value="short">Short (3 min)</option>
+          <option value="medium">Medium (7 min)</option>
+          <option value="long">Long (12 min)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Voice</label>
+        <select id="cfg-voice"></select>
+      </div>
+      <div class="form-group">
+        <label>LLM Model</label>
+        <input type="text" id="cfg-model" readonly>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Auto-Run Interval</label>
+      <input type="text" id="cfg-interval" readonly>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('config-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveConfig()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ START MODAL ══════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="start-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>▶ New Pipeline Run</h2>
+      <button class="icon-btn" onclick="closeModal('start-modal')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="form-group">
+      <label>Niche <span class="label-hint">(leave blank to use config default)</span></label>
+      <input type="text" id="start-niche" placeholder="e.g. technology, gaming, finance…">
+    </div>
+
+    <div class="form-section-title">Video Configuration</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Video Length</label>
+        <div class="segmented-control" id="length-control">
+          <button class="seg-btn active" data-value="short">Short<span class="seg-hint">3 min</span></button>
+          <button class="seg-btn" data-value="medium">Medium<span class="seg-hint">7 min</span></button>
+          <button class="seg-btn" data-value="long">Long<span class="seg-hint">12 min</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Narrator Voice</label>
+      <div class="voice-grid" id="voice-grid"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('start-modal')">Cancel</button>
+      <button class="btn btn-primary" id="start-modal-confirm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Launch Pipeline
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+// Bootstrap config into modals on load
+fetch("/api/config").then(r => r.json()).then(cfg => {
+  // Config modal
+  const n = document.getElementById("cfg-niche");
+  if(n) n.value = cfg.niche;
+  const l = document.getElementById("cfg-length");
+  if(l) l.value = cfg.video_length;
+  const m = document.getElementById("cfg-model");
+  if(m) m.value = cfg.groq_model;
+  const i = document.getElementById("cfg-interval");
+  if(i) i.value = cfg.scheduler_interval_hours + " hours";
+  const badge = document.getElementById("niche-badge");
+  if(badge) badge.textContent = cfg.niche;
+
+  // Populate voice selects
+  const voices = cfg.voices || [];
+  const cfgVoice = document.getElementById("cfg-voice");
+  const voiceGrid = document.getElementById("voice-grid");
+
+  voices.forEach(v => {
+    // Config modal dropdown
+    const opt = document.createElement("option");
+    opt.value = v; opt.textContent = v;
+    if(v === cfg.voice) opt.selected = true;
+    if(cfgVoice) cfgVoice.appendChild(opt);
+
+    // Start modal grid
+    if(voiceGrid) {
+      const btn = document.createElement("button");
+      btn.className = "voice-btn" + (v === cfg.voice ? " active" : "");
+      btn.dataset.value = v;
+      const shortName = v.replace("Neural","").replace("en-US-","").replace("en-GB-","").replace("en-AU-","");
+      btn.innerHTML = `<span class="voice-name">${shortName}</span><span class="voice-locale">${v.split("-").slice(0,2).join("-")}</span>`;
+      btn.onclick = () => {
+        document.querySelectorAll(".voice-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      };
+      voiceGrid.appendChild(btn);
+    }
+  });
+});
+</script>
+</body>
+</html>

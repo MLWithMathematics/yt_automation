@@ -1,0 +1,27 @@
+node_modules/
+.env
+.env.local
+.next/
+dist/
+build/
+*.log
+.DS_Store
+All new PAtch - FraudShield
+.code-review-graph
+.cursor
+.cursorrules
+.mcp.json
+.opencode.json
+.windsurfrules
+AGENTS.md 
+CLAUDE.md 
+GEMINI.md  
+.claude 
+__pycache__
+.code-review-graphignore
+Version.txt
+pipeline.log
+pipeline.db
+output1
+venv
+video_agent.py.bak
