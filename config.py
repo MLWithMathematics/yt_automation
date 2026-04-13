@@ -21,13 +21,13 @@ YOUTUBE_CATEGORY_ID: int   = 28
 VOICE: str                 = "en-US-GuyNeural"
 
 VIDEO_LENGTH_SECONDS: dict = {
-    "short":  120,   # 3 min
+    "short":  120,   # 2 min
     "medium": 420,   # 7 min
     "long":   720,   # 12 min
 }
 
 # ── LLM + Whisper ─────────────────────────────────────────────────────────────
-GROQ_MODEL: str            = "llama-3.3-70b-versatile"
+GROQ_MODEL: str            = "llama-3.1-8b-instant"  # llama-3.1-8b-instant & llama-3.3-70b-versatile
 WHISPER_MODEL: str         = "base"          # tiny | base | small
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
